@@ -7,10 +7,7 @@ venv/
 dist/
 build/
 .pytest_cache/
+.coverage
 .idea/
+settings.local.json
 data/movie_state.json
-infra/.terraform/
-infra/*.tfstate*
-infra/backend.hcl
-infra/.terraform.lock.hcl
-infra/tfplan

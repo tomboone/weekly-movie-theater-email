@@ -1,0 +1,9 @@
+services:
+  app:
+    networks:
+      - default
+    labels: []
+
+networks:
+  proxy:
+    name: proxy
