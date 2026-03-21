@@ -11,3 +11,6 @@ services:
     volumes:
       - .:/app
       - ./data:/app/data
+    command: >-
+      sh -c "uv pip install --system --quiet --group dev
+      && sleep infinity"

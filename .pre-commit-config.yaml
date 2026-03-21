@@ -1,16 +1,41 @@
 repos:
   - repo: local
     hooks:
-      - id: docker-checks
-        name: Run checks in Docker
+      - id: ruff-check
+        name: Ruff check
+        entry: docker compose exec -T app ruff check .
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: ruff-format
+        name: Ruff format
+        entry: docker compose exec -T app ruff format --check .
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: pyright
+        name: Pyright
+        entry: docker compose exec -T app pyright
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: yamllint
+        name: Yamllint
         entry: >-
-          docker compose run --rm -T --no-deps app sh -c
-          "uv pip install --system --quiet --group dev
-          && ruff check .
-          && ruff format --check .
-          && pyright
-          && yamllint -d relaxed .github/ docker-compose.yml Taskfile.yml
-          && pytest tests/ -v -m 'not integration'"
+          docker compose exec -T app
+          yamllint -d relaxed .github/ docker-compose.yml Taskfile.yml
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: pytest
+        name: Pytest (unit)
+        entry: >-
+          docker compose exec -T app
+          pytest tests/ -v -m 'not integration'
         language: system
         pass_filenames: false
         always_run: true
