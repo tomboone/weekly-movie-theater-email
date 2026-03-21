@@ -49,13 +49,14 @@ server.py (FastAPI + APScheduler)
 
 ## Infrastructure
 
-- Azure App Service on existing ASP, own resource group
-- GHCR for container images
-- OpenTofu in `infra/` with remote state in `tbcterraformstate`
-- GitHub Actions (workflow_dispatch + push to main) for deploy
+- Runs on Raspberry Pi (DietPi) as a Docker container
+- GHCR for container images (multi-platform: amd64 + arm64)
+- GitHub Actions builds and pushes image on push to main or workflow_dispatch
 - CI workflow runs on PRs to main and updates/dependencies
 - Dependabot for dependency updates (PRs target updates/dependencies branch)
-- Existing ACS + Email Communication Service shared with mlb-today
+- Pi polls for new images via `scripts/update.sh` cron job
+- `docker-compose.prod.yml` for production, `docker-compose.yml` for local dev
+- ACS (Azure Communication Services) for email delivery
 
 ## Testing
 

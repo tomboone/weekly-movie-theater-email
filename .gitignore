@@ -9,7 +9,3 @@ build/
 .pytest_cache/
 .idea/
 data/movie_state.json
-infra/.terraform/
-infra/*.tfstate*
-infra/.terraform.lock.hcl
-infra/tfplan

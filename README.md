@@ -2,7 +2,7 @@
 
 A pipeline that checks what movies are showing at your local Regal theater each week, identifies new releases, enriches them with metadata from TMDB, and sends you a formatted HTML email.
 
-Runs on Azure App Service as a Docker container with an internal scheduler (Friday 10 AM ET).
+Runs as a Docker container with an internal scheduler (Friday 10 AM ET). Designed to run on a Raspberry Pi or similar always-on device.
 
 ## Setup
 
@@ -48,6 +48,13 @@ task hooks:install
 
 ## Deployment
 
-Infrastructure is managed with OpenTofu in `infra/`. Deployment is via GitHub Actions — automatically on push to `main` (for app/infra changes) or manually via `workflow_dispatch`.
+The container image is built and pushed to GHCR via GitHub Actions on push to `main` or via `workflow_dispatch`. The image supports both amd64 and arm64.
+
+### Production setup (Raspberry Pi)
+
+1. Clone the repo on the Pi
+2. Copy `.env` with production values
+3. `docker compose -f docker-compose.prod.yml up -d`
+4. Add a cron job to poll for updates: `*/5 * * * * /path/to/weekly-movie-theater-email/scripts/update.sh`
 
 Dependabot PRs target `updates/dependencies` for batched merging.
