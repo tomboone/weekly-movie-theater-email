@@ -1,0 +1,16 @@
+repos:
+  - repo: local
+    hooks:
+      - id: docker-checks
+        name: Run checks in Docker
+        entry: >-
+          docker compose run --rm -T --no-deps app sh -c
+          "uv pip install --system --quiet --group dev
+          && ruff check .
+          && ruff format --check .
+          && pyright
+          && yamllint -d relaxed .github/ docker-compose.yml Taskfile.yml
+          && pytest tests/ -v -m 'not integration'"
+        language: system
+        pass_filenames: false
+        always_run: true

@@ -80,6 +80,6 @@ tasks:
       - docker compose run --rm app bash
 
   hooks:install:
-    desc: Configure git to use .githooks directory
+    desc: Install pre-commit hooks
     cmds:
-      - git config core.hooksPath .githooks
+      - pre-commit install
