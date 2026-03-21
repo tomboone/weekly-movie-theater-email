@@ -40,18 +40,18 @@ resource "azurerm_linux_web_app" "main" {
   }
 
   app_settings = {
-    REGAL_CINEMA_ID                = var.regal_cinema_id
-    TMDB_API_KEY                   = var.tmdb_api_key
-    ACS_CONNECTION_STRING          = data.azurerm_communication_service.existing.primary_connection_string
-    EMAIL_FROM                     = var.email_from
-    EMAIL_TO                       = var.email_to
-    MOVIE_STATE_PATH               = "/home/data/movie_state.json"
-    SCHEDULE_CRON                  = "0 10 * * 5"
-    SCHEDULE_TIMEZONE              = "America/New_York"
-    TRIGGER_API_KEY                = var.trigger_api_key
+    REGAL_CINEMA_ID                     = var.regal_cinema_id
+    TMDB_API_KEY                        = var.tmdb_api_key
+    ACS_CONNECTION_STRING               = data.azurerm_communication_service.existing.primary_connection_string
+    EMAIL_FROM                          = var.email_from
+    EMAIL_TO                            = var.email_to
+    MOVIE_STATE_PATH                    = "/home/data/movie_state.json"
+    SCHEDULE_CRON                       = "0 10 * * 5"
+    SCHEDULE_TIMEZONE                   = "America/New_York"
+    TRIGGER_API_KEY                     = var.trigger_api_key
     WEBSITES_ENABLE_APP_SERVICE_STORAGE = "true"
-    WEBSITES_PORT                  = "8000"
-    APPINSIGHTS_INSTRUMENTATIONKEY = azurerm_application_insights.main.instrumentation_key
+    WEBSITES_PORT                       = "8000"
+    APPINSIGHTS_INSTRUMENTATIONKEY      = azurerm_application_insights.main.instrumentation_key
   }
 
   logs {
