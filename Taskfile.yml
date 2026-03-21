@@ -2,7 +2,22 @@ version: "3"
 
 dotenv: [".env"]
 
+vars:
+  INFRA_DIR: ../tbc-localdev-infra
+
 tasks:
+  infra:up:
+    desc: Start infrastructure containers (traefik, etc.)
+    cmd: task --dir {{.INFRA_DIR}} up
+
+  infra:down:
+    desc: Stop infrastructure containers
+    cmd: task --dir {{.INFRA_DIR}} down
+
+  infra:status:
+    desc: Show infrastructure container status
+    cmd: task --dir {{.INFRA_DIR}} status
+
   build:
     desc: Build the Docker image
     cmds:
@@ -10,7 +25,7 @@ tasks:
 
   up:
     desc: Start the dev container
-    deps: [build]
+    deps: [infra:up, build]
     cmds:
       - docker compose up -d --remove-orphans
 
@@ -87,7 +102,7 @@ tasks:
       - >-
         curl -X POST
         -H "Authorization: Bearer $TRIGGER_API_KEY"
-        "http://localhost:8000/trigger{{if .CLI_ARGS}}?date={{.CLI_ARGS}}{{end}}"
+        "https://movie-email.localhost/trigger{{if .CLI_ARGS}}?date={{.CLI_ARGS}}{{end}}"
 
   shell:
     desc: Open a shell in the container

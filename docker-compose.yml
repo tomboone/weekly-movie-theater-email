@@ -1,8 +1,6 @@
 services:
   app:
     build: .
-    ports:
-      - "8000:8000"
     env_file:
       - path: .env
         required: false
@@ -11,6 +9,18 @@ services:
     volumes:
       - .:/app
       - ./data:/app/data
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.movie-email.rule=Host(`movie-email.localhost`)"
+      - "traefik.http.routers.movie-email.tls=true"
+      - "traefik.http.routers.movie-email.entrypoints=websecure"
+      - "traefik.http.services.movie-email.loadbalancer.server.port=8000"
     command: >-
       sh -c "uv pip install --system --quiet --group dev
       && sleep infinity"
+
+networks:
+  proxy:
+    external: true
