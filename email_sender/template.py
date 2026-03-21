@@ -23,7 +23,7 @@ def _render_movie_card(movie: dict) -> str:
       <div style="font-size:18px;font-weight:bold;margin-bottom:8px">
         <a href="{url}" style="color:#1a73e8;text-decoration:none">{title}</a>{rerelease}
       </div>
-      {'<div style="color:#888;font-size:13px;margin-bottom:8px">' + meta_line + '</div>' if meta_line else ''}
+      {'<div style="color:#888;font-size:13px;margin-bottom:8px">' + meta_line + "</div>" if meta_line else ""}
       <div style="color:#555;font-size:14px;margin-bottom:4px"><strong>Director:</strong> {director}</div>
       <div style="color:#555;font-size:14px;margin-bottom:4px"><strong>Cast:</strong> {cast}</div>
       <div style="color:#555;font-size:14px"><strong>Genre:</strong> {genres}</div>
