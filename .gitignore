@@ -11,6 +11,5 @@ build/
 data/movie_state.json
 infra/.terraform/
 infra/*.tfstate*
-infra/backend.hcl
 infra/.terraform.lock.hcl
 infra/tfplan
