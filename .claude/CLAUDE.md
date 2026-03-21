@@ -18,7 +18,8 @@ task test:unit      # Run unit tests only
 task check          # Run all checks (ruff, pyright, yamllint, pytest)
 task lint           # Ruff check + format
 task lint:fix       # Auto-fix ruff issues
-task trigger        # curl POST to /trigger
+task trigger        # curl POST to /trigger (requires TRIGGER_API_KEY in .env)
+task trigger -- MM-DD-YYYY  # trigger with date override
 task hooks:install  # Set up git pre-commit hooks
 ```
 
@@ -40,6 +41,9 @@ server.py (FastAPI + APScheduler)
 - No OMDB, no scores in email — removed entirely
 - No "special screenings" section — movies are either new or rerelease
 - Rerelease detection uses **US theatrical release date** from TMDB (not generic release_date which is often a festival premiere)
+- Display year after title uses **earliest TMDB release_date** (separate from rerelease logic)
+- Email shows runtime and MPAA rating beneath title
+- `/trigger` endpoint requires Bearer token auth (`TRIGGER_API_KEY`)
 - State saved last in pipeline for retry safety
 - playwright-stealth **v2** (v1 uses deprecated pkg_resources)
 
@@ -48,13 +52,15 @@ server.py (FastAPI + APScheduler)
 - Azure App Service on existing ASP, own resource group
 - GHCR for container images
 - OpenTofu in `infra/` with remote state in `tbcterraformstate`
-- GitHub Actions (workflow_dispatch) for deploy
+- GitHub Actions (workflow_dispatch + push to main) for deploy
+- CI workflow runs on PRs to main and updates/dependencies
+- Dependabot for dependency updates (PRs target updates/dependencies branch)
 - Existing ACS + Email Communication Service shared with mlb-today
 
 ## Testing
 
 ```
-task test:unit    # 25 unit tests, runs in container
+task test:unit    # 26 unit tests, runs in container
 task test         # All tests including integration (needs network + Playwright)
 ```
 

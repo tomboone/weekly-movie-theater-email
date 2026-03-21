@@ -25,7 +25,9 @@ Runs on Azure App Service as a Docker container with an internal scheduler (Frid
 | `ACS_CONNECTION_STRING` | Azure Communication Services connection string |
 | `EMAIL_FROM` | ACS verified sender address |
 | `EMAIL_TO` | Recipient email address |
-| `EXCLUDE_PATTERNS` | Comma-separated title substrings to exclude (default: `Met Opera,NT Live,Bolshoi Ballet,Fathom`) |
+| `EXCLUDE_PATTERNS` | Comma-separated title substrings to exclude (default: `Met Opera,NT Live,Bolshoi Ballet,Fathom,MARS:`) |
+| `TRIGGER_API_KEY` | Bearer token for the `/trigger` endpoint |
+| `SEND_EMPTY_EMAIL` | Send email even when no new movies (default: `false`) |
 
 ## Development
 
@@ -46,6 +48,6 @@ task hooks:install
 
 ## Deployment
 
-Infrastructure is managed with OpenTofu in `infra/`. Deployment is via GitHub Actions (`workflow_dispatch`).
+Infrastructure is managed with OpenTofu in `infra/`. Deployment is via GitHub Actions — automatically on push to `main` (for app/infra changes) or manually via `workflow_dispatch`.
 
-See `docs/plans/` for the design document and implementation plan.
+Dependabot PRs target `updates/dependencies` for batched merging.

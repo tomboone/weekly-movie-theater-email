@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, updates/dependencies]
+
+jobs:
+  check:
+    name: Lint, Type Check, and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: docker compose build
+
+      - name: Run checks
+        run: >-
+          docker compose run --rm --no-deps app sh -c
+          "uv pip install --system --quiet --group dev
+          && ruff check .
+          && ruff format --check .
+          && pyright
+          && pytest tests/ -v -m 'not integration'"
