@@ -1,0 +1,85 @@
+version: "3"
+
+dotenv: [".env"]
+
+tasks:
+  build:
+    desc: Build the Docker image
+    cmds:
+      - docker compose build
+
+  run:
+    desc: Run the app in Docker
+    deps: [build]
+    cmds:
+      - docker compose up
+
+  check:
+    desc: Run all checks (ruff, pyright, yamllint, pytest) in Docker
+    deps: [build]
+    cmds:
+      - >-
+        docker compose run --rm --no-deps app sh -c
+        "uv pip install --system --quiet --group dev
+        && ruff check .
+        && ruff format --check .
+        && pyright
+        && yamllint -d relaxed .github/ docker-compose.yml Taskfile.yml
+        && pytest tests/ -v -m 'not integration'"
+
+  lint:
+    desc: Run ruff check and format in Docker
+    deps: [build]
+    cmds:
+      - >-
+        docker compose run --rm --no-deps app sh -c
+        "uv pip install --system --quiet --group dev
+        && ruff check .
+        && ruff format --check ."
+
+  lint:fix:
+    desc: Auto-fix ruff issues in Docker
+    deps: [build]
+    cmds:
+      - >-
+        docker compose run --rm --no-deps app sh -c
+        "uv pip install --system --quiet --group dev
+        && ruff check --fix .
+        && ruff format ."
+
+  test:
+    desc: Run tests in Docker
+    deps: [build]
+    cmds:
+      - >-
+        docker compose run --rm --no-deps app sh -c
+        "uv pip install --system --quiet --group dev
+        && pytest tests/ -v"
+
+  test:unit:
+    desc: Run unit tests only (no network)
+    deps: [build]
+    cmds:
+      - >-
+        docker compose run --rm --no-deps app sh -c
+        "uv pip install --system --quiet --group dev
+        && pytest tests/ -v -m 'not integration'"
+
+  trigger:
+    desc: "Manually trigger the pipeline (usage: task trigger [-- --date MM-DD-YYYY])"
+    cmds:
+      - >-
+        curl -X POST
+        -H "Authorization: Bearer $TRIGGER_API_KEY"
+        "http://localhost:8000/trigger{{if .CLI_ARGS}}?date={{.CLI_ARGS}}{{end}}"
+
+  shell:
+    desc: Open a shell in the container
+    deps: [build]
+    cmds:
+      - docker compose run --rm app bash
+
+  hooks:install:
+    desc: Configure git to use .githooks directory
+    cmds:
+      - git config core.hooksPath .githooks

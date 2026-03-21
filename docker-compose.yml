@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - MOVIE_STATE_PATH=/app/data/movie_state.json
+    volumes:
+      - .:/app
+      - ./data:/app/data

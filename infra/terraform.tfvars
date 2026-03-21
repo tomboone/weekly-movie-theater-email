@@ -1,0 +1,6 @@
+app_service_plan_name      = "asp-tbc-app-services-01"
+app_service_plan_rg        = "rg-tbc-app-services"
+log_analytics_workspace_id = "/subscriptions/de448de3-61e7-4067-b981-d1aeb0ce136d/resourceGroups/DefaultResourceGroup-EUS2/providers/microsoft.operationalinsights/workspaces/DefaultWorkspace-de448de3-61e7-4067-b981-d1aeb0ce136d-EUS2"
+acs_name                   = "TBC-Subscription-ACS"
+acs_rg                     = "RG-ACS-Email"
+regal_cinema_id            = "0336"

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Running pre-commit checks in container..."
+
+docker compose run --rm -T --no-deps app sh -c '
+  uv pip install --system --quiet --group dev &&
+  echo "=== ruff check ===" &&
+  ruff check . &&
+  echo "=== ruff format ===" &&
+  ruff format --check . &&
+  echo "=== pyright ===" &&
+  pyright &&
+  echo "=== yamllint ===" &&
+  yamllint -d relaxed .github/ docker-compose.yml Taskfile.yml &&
+  echo "=== pytest ===" &&
+  pytest tests/ -v -m "not integration"
+'
+
+echo "All checks passed."
