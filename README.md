@@ -1,13 +1,13 @@
-# Weekly Movie Theater Email
+x# Weekly Movie Theater Email
 
 A pipeline that checks what movies are showing at your local Regal theater each week, identifies new releases, enriches them with metadata from TMDB, and sends you a formatted HTML email.
 
-Runs on Azure App Service as a Docker container with an internal scheduler (Friday 10 AM ET).
+Runs as a Docker container with an internal scheduler (Friday 10 AM ET). Designed to run on a Raspberry Pi or similar always-on device.
 
 ## Setup
 
 1. Copy `.env.example` to `.env` and fill in your values
-2. `task build` to build the Docker image
+2. `task up` to start the infra and dev container
 3. `task run` to start the app
 4. `task trigger` to manually run the pipeline
 
@@ -31,13 +31,21 @@ Runs on Azure App Service as a Docker container with an internal scheduler (Frid
 
 ## Development
 
-Requires Docker and [go-task](https://taskfile.dev).
+Requires Docker, [go-task](https://taskfile.dev), and [pre-commit](https://pre-commit.com).
+
+Local dev uses the shared `tbc-localdev-infra` stack (Traefik, etc.). The app is accessible at `https://movie-email.localhost`.
 
 ```
+task up           # Start infra + dev container
+task run          # Run the app (in a separate terminal)
+task stop         # Stop the dev container
+task down         # Remove the dev container
+task reset        # Tear down, rebuild, start fresh
 task check        # Run all checks (lint, typecheck, yaml, tests)
 task test:unit    # Run unit tests only
 task lint:fix     # Auto-fix lint issues
 task shell        # Open a shell in the container
+task trigger      # Manually trigger the pipeline
 ```
 
 ### Pre-commit hooks
@@ -46,8 +54,17 @@ task shell        # Open a shell in the container
 task hooks:install
 ```
 
+Requires the dev container to be running (`task up`).
+
 ## Deployment
 
-Infrastructure is managed with OpenTofu in `infra/`. Deployment is via GitHub Actions — automatically on push to `main` (for app/infra changes) or manually via `workflow_dispatch`.
+The container image is built and pushed to GHCR via GitHub Actions on push to `main` or via `workflow_dispatch`. The image supports both amd64 and arm64.
+
+### Production setup (Raspberry Pi)
+
+1. Clone the repo on the Pi
+2. Copy `.env` with production values
+3. `docker compose -f docker-compose.prod.yml up -d`
+4. Add a cron job to poll for updates: `*/5 * * * * /path/to/weekly-movie-theater-email/scripts/update.sh`
 
 Dependabot PRs target `updates/dependencies` for batched merging.
