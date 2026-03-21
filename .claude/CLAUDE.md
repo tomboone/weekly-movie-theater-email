@@ -11,17 +11,32 @@ Python pipeline that scrapes Regal theater showtimes weekly, enriches with TMDB 
 ### Common commands
 
 ```
+task up             # Start infra + dev container
+task run            # Run the app (uvicorn via exec)
+task stop           # Stop the dev container
+task down           # Remove the dev container
+task reset          # Tear down, rebuild, start fresh
 task build          # Build Docker image
-task run            # Start the app
 task test           # Run all tests
 task test:unit      # Run unit tests only
 task check          # Run all checks (ruff, pyright, yamllint, pytest)
 task lint           # Ruff check + format
 task lint:fix       # Auto-fix ruff issues
-task trigger        # curl POST to /trigger (requires TRIGGER_API_KEY in .env)
+task trigger        # POST to /trigger via Traefik (requires TRIGGER_API_KEY in .env)
 task trigger -- MM-DD-YYYY  # trigger with date override
-task hooks:install  # Set up git pre-commit hooks
+task shell          # Open a shell in the container
+task hooks:install  # Install pre-commit hooks
+task infra:up       # Start shared localdev infra (traefik, etc.)
+task infra:down     # Stop shared localdev infra
+task infra:status   # Show infra container status
 ```
+
+### Local dev architecture
+
+- Container idles with dev deps pre-installed; app runs via `task run`
+- All dev tasks use `docker compose exec` on the running container (no new containers)
+- Integrated with `tbc-localdev-infra` — Traefik routes `https://movie-email.localhost` to the app
+- Pre-commit hooks (via pre-commit framework) also use `exec` — container must be up
 
 ## Architecture
 
@@ -61,7 +76,7 @@ server.py (FastAPI + APScheduler)
 ## Testing
 
 ```
-task test:unit    # 26 unit tests, runs in container
+task test:unit    # 33 unit tests, runs in container
 task test         # All tests including integration (needs network + Playwright)
 ```
 
