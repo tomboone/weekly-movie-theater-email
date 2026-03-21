@@ -31,7 +31,7 @@ jobs:
     name: Build and Push Image
     runs-on: ubuntu-latest
     outputs:
-      image_tag: ${{ steps.meta.outputs.tags }}
+      image_tag: ${{ steps.set-image.outputs.image }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,6 +58,10 @@ jobs:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+
+      - name: Set image output
+        id: set-image
+        run: echo "image=${{ env.GHCR_IMAGE }}:sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
   deploy:
     name: Deploy Infrastructure
