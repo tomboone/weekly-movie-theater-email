@@ -36,16 +36,22 @@ Requires Docker, [go-task](https://taskfile.dev), and [pre-commit](https://pre-c
 Local dev uses the shared `tbc-localdev-infra` stack (Traefik, etc.). The app is accessible at `https://movie-email.localhost`.
 
 ```
-task up           # Start infra + dev container
-task run          # Run the app (in a separate terminal)
-task stop         # Stop the dev container
-task down         # Remove the dev container
-task reset        # Tear down, rebuild, start fresh
-task check        # Run all checks (lint, typecheck, yaml, tests)
-task test:unit    # Run unit tests only
-task lint:fix     # Auto-fix lint issues
-task shell        # Open a shell in the container
-task trigger      # Manually trigger the pipeline
+task up               # Start infra + dev container
+task run              # Run the app (in a separate terminal)
+task stop             # Stop the dev container
+task down             # Remove the dev container
+task reset            # Tear down, rebuild, start fresh
+task check            # Run all checks (lint, format, typecheck, yaml, tests)
+task test             # Run unit tests
+task test:integration # Run integration tests (network + Playwright)
+task test:all         # Run all tests
+task lint             # Ruff check
+task lint:fix         # Auto-fix lint issues
+task format           # Check code formatting
+task format:fix       # Auto-format code
+task typecheck        # Run pyright type checker
+task shell            # Open a shell in the container
+task trigger          # Manually trigger the pipeline
 ```
 
 ### Pre-commit hooks
