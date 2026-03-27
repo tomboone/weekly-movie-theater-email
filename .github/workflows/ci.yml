@@ -25,4 +25,4 @@ jobs:
           && ruff check .
           && ruff format --check .
           && pyright
-          && pytest tests/ -v -m 'not integration'"
+          && pytest tests/unit/ -v"

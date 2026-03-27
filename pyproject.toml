@@ -20,6 +20,7 @@ dev = [
     "pytest>=8.0,<10",
     "respx>=0.22,<1",
     "pyright>=1.1",
+    "pytest-cov>=6.0",
     "ruff>=0.9",
     "yamllint>=1.35",
 ]
@@ -38,5 +39,4 @@ venvPath = "."
 venv = "."
 
 [tool.pytest.ini_options]
-markers = ["integration: requires network and Playwright browsers"]
 asyncio_mode = "auto"

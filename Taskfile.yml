@@ -56,45 +56,59 @@ tasks:
 
   check:
     desc: Run all checks (ruff, pyright, yamllint, pytest)
-    deps: [up]
     cmds:
       - >-
-        docker compose exec app sh -c
+        docker compose exec -T app sh -c
         "ruff check .
         && ruff format --check .
         && pyright
         && yamllint -d relaxed .github/ docker-compose.yml Taskfile.yml
-        && pytest tests/ -v -m 'not integration'"
+        && pytest tests/unit/ -v"
 
   lint:
-    desc: Run ruff check and format
-    deps: [up]
+    desc: Run ruff check
     cmds:
-      - >-
-        docker compose exec app sh -c
-        "ruff check . && ruff format --check ."
+      - docker compose exec -T app ruff check .
 
   lint:fix:
     desc: Auto-fix ruff issues
-    deps: [up]
     cmds:
-      - >-
-        docker compose exec app sh -c
-        "ruff check --fix . && ruff format ."
+      - docker compose exec -T app ruff check --fix .
+
+  typecheck:
+    desc: Run pyright type checker
+    cmds:
+      - docker compose exec -T app pyright
+
+  yamllint:
+    desc: Lint YAML files
+    cmds:
+      - docker compose exec -T app yamllint -d relaxed .github/ docker-compose.yml Taskfile.yml
+
+  format:
+    desc: Check code formatting
+    cmds:
+      - docker compose exec -T app ruff format --check .
+
+  format:fix:
+    desc: Auto-format code
+    cmds:
+      - docker compose exec -T app ruff format .
 
   test:
-    desc: Run all tests
-    deps: [up]
+    desc: Run unit tests
     cmds:
-      - docker compose exec app pytest tests/ -v
+      - docker compose exec -T app pytest tests/unit/ -v
 
-  test:unit:
-    desc: Run unit tests only (no network)
-    deps: [up]
+  test:integration:
+    desc: Run integration tests (requires network + Playwright)
     cmds:
-      - >-
-        docker compose exec app
-        pytest tests/ -v -m 'not integration'
+      - docker compose exec -T app pytest tests/integration/ -v
+
+  test:all:
+    desc: Run all tests
+    cmds:
+      - docker compose exec -T app pytest tests/ -v
 
   trigger:
     desc: "Manually trigger (usage: task trigger [-- MM-DD-YYYY])"
@@ -106,7 +120,6 @@ tasks:
 
   shell:
     desc: Open a shell in the container
-    deps: [up]
     cmds:
       - docker compose exec app bash
 

@@ -17,11 +17,15 @@ task stop           # Stop the dev container
 task down           # Remove the dev container
 task reset          # Tear down, rebuild, start fresh
 task build          # Build Docker image
-task test           # Run all tests
-task test:unit      # Run unit tests only
+task test              # Run unit tests
+task test:integration  # Run integration tests (network + Playwright)
+task test:all          # Run all tests
 task check          # Run all checks (ruff, pyright, yamllint, pytest)
-task lint           # Ruff check + format
+task lint           # Ruff check
 task lint:fix       # Auto-fix ruff issues
+task typecheck      # Run pyright type checker
+task format         # Check code formatting
+task format:fix     # Auto-format code
 task trigger        # POST to /trigger via Traefik (requires TRIGGER_API_KEY in .env)
 task trigger -- MM-DD-YYYY  # trigger with date override
 task shell          # Open a shell in the container
@@ -76,8 +80,9 @@ server.py (FastAPI + APScheduler)
 ## Testing
 
 ```
-task test:unit    # 33 unit tests, runs in container
-task test         # All tests including integration (needs network + Playwright)
+task test              # Unit tests (tests/unit/)
+task test:integration  # Integration tests (tests/integration/) — needs network + Playwright
+task test:all          # All tests
 ```
 
 Tests use respx for mocking httpx. Config tests may be affected by .env file — use `_env_file=None` or monkeypatch to isolate.

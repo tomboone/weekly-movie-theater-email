@@ -1,4 +1,4 @@
-x# Weekly Movie Theater Email
+# Weekly Movie Theater Email
 
 A pipeline that checks what movies are showing at your local Regal theater each week, identifies new releases, enriches them with metadata from TMDB, and sends you a formatted HTML email.
 

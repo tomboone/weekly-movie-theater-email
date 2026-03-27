@@ -1,0 +1,29 @@
+name: Rebase updates/dependencies
+
+on:
+  schedule:
+    - cron: "45 12 * * 6"  # 12:45 UTC Saturdays — before Dependabot's 9am ET run
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  rebase:
+    name: Rebase onto main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout updates/dependencies
+        uses: actions/checkout@v6
+        with:
+          ref: updates/dependencies
+          fetch-depth: 0
+
+      - name: Rebase onto main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git rebase origin/main
+
+      - name: Push
+        run: git push --force-with-lease

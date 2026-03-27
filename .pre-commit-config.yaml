@@ -3,39 +3,35 @@ repos:
     hooks:
       - id: ruff-check
         name: Ruff check
-        entry: docker compose exec -T app ruff check .
+        entry: task lint
         language: system
         pass_filenames: false
         always_run: true
 
       - id: ruff-format
         name: Ruff format
-        entry: docker compose exec -T app ruff format --check .
+        entry: task format
         language: system
         pass_filenames: false
         always_run: true
 
       - id: pyright
         name: Pyright
-        entry: docker compose exec -T app pyright
+        entry: task typecheck
         language: system
         pass_filenames: false
         always_run: true
 
       - id: yamllint
         name: Yamllint
-        entry: >-
-          docker compose exec -T app
-          yamllint -d relaxed .github/ docker-compose.yml Taskfile.yml
+        entry: task yamllint
         language: system
         pass_filenames: false
         always_run: true
 
       - id: pytest
         name: Pytest (unit)
-        entry: >-
-          docker compose exec -T app
-          pytest tests/ -v -m 'not integration'
+        entry: task test
         language: system
         pass_filenames: false
         always_run: true
