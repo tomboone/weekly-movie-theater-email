@@ -16,7 +16,7 @@ from state import load_state
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 
-settings = Settings()  # type: ignore[reportCallIssue]
+settings: Settings = None  # type: ignore[assignment]
 
 
 def _parse_cron(expr: str) -> dict:
@@ -94,6 +94,9 @@ async def _scheduler_watchdog(scheduler: AsyncIOScheduler, check_interval: float
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global settings
+    if settings is None:  # type: ignore[comparison-overlap]
+        settings = Settings()  # type: ignore[reportCallIssue]
     scheduler = AsyncIOScheduler()
     cron_kwargs = _parse_cron(settings.schedule_cron)
     scheduler.add_job(
