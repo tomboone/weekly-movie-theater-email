@@ -21,12 +21,14 @@ settings: Settings = None  # type: ignore[assignment]
 
 def _parse_cron(expr: str) -> dict:
     parts = expr.split()
+    # Convert standard cron day_of_week (0=Sunday) to APScheduler/ISO (0=Monday)
+    dow = str((int(parts[4]) - 1) % 7)
     return {
         "minute": parts[0],
         "hour": parts[1],
         "day": parts[2],
         "month": parts[3],
-        "day_of_week": parts[4],
+        "day_of_week": dow,
     }
 
 
@@ -43,8 +45,8 @@ def _most_recent_scheduled_time(cron_expr: str, timezone: str) -> datetime | Non
     """
     cron = _parse_cron(cron_expr)
     minute, hour = int(cron["minute"]), int(cron["hour"])
-    # Convert cron day_of_week (0=Sunday) to Python weekday (0=Monday)
-    python_dow = (int(cron["day_of_week"]) - 1) % 7
+    # _parse_cron already returns ISO weekday (0=Monday), same as Python
+    python_dow = int(cron["day_of_week"])
 
     tz = ZoneInfo(timezone)
     now = _now().astimezone(tz)
