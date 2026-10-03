@@ -6,7 +6,7 @@ dependencies = [
     "playwright==1.63.0",
     "playwright-stealth>=2.0.3,<3",
     "httpx>=0.28.1,<1",
-    "fastapi>=0.141.1,<1",
+    "fastapi>=0.142.2,<1",
     "uvicorn>=0.53.0,<1",
     "apscheduler>=3.11.3,<4",
     "azure-communication-email>=1.1.0,<2",
