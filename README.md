@@ -2,7 +2,7 @@
 
 A pipeline that checks what movies are showing at your local Regal theater each week, identifies new releases, enriches them with metadata from TMDB, and sends you a formatted HTML email.
 
-Runs as a Docker container with an internal scheduler (Friday 10 AM ET). Designed to run on a Raspberry Pi or similar always-on device.
+Runs as a Docker container with an internal scheduler (Friday 10 AM ET). Runs on `kumadrome`, the home server (a 2011 Mac mini on Ubuntu, on a residential connection; it replaced the Raspberry Pi on 2026-10-17).
 
 ## Setup
 
@@ -66,11 +66,13 @@ Requires the dev container to be running (`task up`).
 
 The container image is built and pushed to GHCR via GitHub Actions on push to `main` or via `workflow_dispatch`. The image supports both amd64 and arm64.
 
-### Production setup (Raspberry Pi)
+### Production setup (kumadrome)
 
-1. Clone the repo on the Pi
+1. Clone the repo on the host
 2. Copy `.env` with production values
 3. `docker compose -f docker-compose.prod.yml up -d`
 4. Add a cron job to poll for updates: `*/5 * * * * /path/to/weekly-movie-theater-email/scripts/update.sh`
+
+The port is published on `127.0.0.1` only. To call `/trigger` from elsewhere, tunnel in: `ssh -L 8000:127.0.0.1:8000 kumadrome`.
 
 Dependabot PRs target `updates/dependencies` for batched merging.
