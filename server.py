@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import sys
+import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -11,6 +12,7 @@ from fastapi import FastAPI, Header, HTTPException
 
 from config import Settings
 from main import run_pipeline
+from monitor import kuma_push
 from state import load_state
 
 logger = logging.getLogger(__name__)
@@ -77,10 +79,24 @@ def _should_run_on_startup(
     return last_run_date < most_recent.date()
 
 
+async def _run_and_report(date_override: str | None = None) -> None:
+    """Run the pipeline and report the outcome to the Kuma push monitor, if one is configured."""
+    start = time.monotonic()
+    try:
+        if date_override is None:
+            await run_pipeline(settings)
+        else:
+            await run_pipeline(settings, date_override=date_override)
+    except Exception as e:
+        await kuma_push(settings.kuma_push_url, "down", f"{type(e).__name__}: {e}")
+        raise
+    await kuma_push(settings.kuma_push_url, "up", "OK", int((time.monotonic() - start) * 1000))
+
+
 async def _scheduled_run():
     logger.info("Scheduler triggered pipeline run")
     try:
-        await run_pipeline(settings)
+        await _run_and_report()
     except Exception:
         logger.exception("Pipeline run failed")
 
@@ -112,7 +128,7 @@ async def lifespan(app: FastAPI):
     if _should_run_on_startup(settings.schedule_cron, settings.schedule_timezone, state["last_run"]):
         logger.info("Missed run detected — running pipeline now")
         try:
-            await run_pipeline(settings)
+            await _run_and_report()
         except Exception:
             logger.exception("Startup pipeline run failed")
 
@@ -139,7 +155,7 @@ async def trigger(date: str | None = None, authorization: str = Header(default="
         raise HTTPException(status_code=401, detail="Unauthorized")
     logger.info("Manual trigger received (date override: %s)", date)
     try:
-        await run_pipeline(settings, date_override=date)
+        await _run_and_report(date_override=date)
         return {"status": "success"}
     except Exception as e:
         logger.exception("Pipeline failed")

@@ -53,6 +53,7 @@ server.py (FastAPI + APScheduler)
     → email_sender/template.py (HTML render)
     → email_sender/acs.py (Azure Communication Services)
     → state.py (JSON file diff)
+  → monitor.py (Kuma push after every run; never raises)
 ```
 
 ## Key Design Decisions
@@ -68,12 +69,13 @@ server.py (FastAPI + APScheduler)
 
 ## Infrastructure
 
-- Runs on Raspberry Pi (DietPi) as a Docker container
+- Runs on `kumadrome`, the home server (2011 Mac mini, Ubuntu), as a Docker container. It replaced the Raspberry Pi on 2026-10-17. Prod publishes `127.0.0.1:8000` only.
 - GHCR for container images (multi-platform: amd64 + arm64)
 - GitHub Actions builds and pushes image on push to main or workflow_dispatch
 - CI workflow runs on PRs to main and updates/dependencies
 - Dependabot for dependency updates (PRs target updates/dependencies branch)
-- Pi polls for new images via `scripts/update.sh` cron job
+- The host polls for new images via a `scripts/update.sh` cron job (every 5 min)
+- Optional `KUMA_PUSH_URL`: after every run `monitor.kuma_push` reports up/down to the personal Uptime Kuma, over the external `kuma-push` Docker network
 - `docker-compose.prod.yml` for production, `docker-compose.yml` for local dev
 - ACS (Azure Communication Services) for email delivery
 

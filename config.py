@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     schedule_cron: str = "0 10 * * 5"
     trigger_api_key: str = ""
     schedule_timezone: str = "America/New_York"
+    kuma_push_url: str = ""
 
     @field_validator("schedule_cron", mode="after")
     @classmethod

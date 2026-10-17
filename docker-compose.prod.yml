@@ -12,6 +12,15 @@ services:
       - MOVIE_STATE_PATH=/app/data/movie_state.json
     volumes:
       - app-data:/app/data
+    networks:
+      - default
+      # Shared with the personal Uptime Kuma (tomboone/uptime-kuma-container), which creates it, so
+      # KUMA_PUSH_URL can be http://uptime-kuma:3001/api/push/<token> with nothing published on the host.
+      - kuma-push
 
 volumes:
   app-data:
+
+networks:
+  kuma-push:
+    external: true
