@@ -3,7 +3,9 @@ services:
     image: ghcr.io/tomboone/weekly-movie-theater-email:latest
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      # Loopback only. Docker-published ports bypass the host firewall (ufw), so "8000:8000" exposes
+      # the app, /trigger included, to the whole LAN. Reach it from the host or over an SSH tunnel.
+      - "127.0.0.1:8000:8000"
     env_file:
       - .env
     environment:
