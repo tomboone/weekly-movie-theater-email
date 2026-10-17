@@ -88,6 +88,7 @@ async def test_lifespan_triggers_pipeline_on_missed_run(mock_settings, mock_chec
     mock_settings.schedule_cron = "0 10 * * 5"
     mock_settings.schedule_timezone = "America/New_York"
     mock_settings.movie_state_path = "/tmp/nonexistent.json"
+    mock_settings.kuma_push_url = ""
 
     app = MagicMock()
     async with lifespan(app):
@@ -107,6 +108,7 @@ async def test_lifespan_skips_pipeline_when_not_missed(mock_settings, mock_check
     mock_settings.schedule_cron = "0 10 * * 5"
     mock_settings.schedule_timezone = "America/New_York"
     mock_settings.movie_state_path = "/tmp/nonexistent.json"
+    mock_settings.kuma_push_url = ""
 
     app = MagicMock()
     async with lifespan(app):
@@ -149,3 +151,35 @@ async def test_watchdog_does_not_exit_when_scheduler_alive(mock_exit):
         await task
 
     mock_exit.assert_not_called()
+
+
+@pytest.mark.asyncio
+@patch("server.kuma_push", new_callable=AsyncMock)
+@patch("server.run_pipeline", new_callable=AsyncMock)
+@patch("server.settings")
+async def test_scheduled_run_pushes_up_on_success(mock_settings, mock_pipeline, mock_push):
+    """A successful run reports status=up to the Kuma push monitor."""
+    from server import _scheduled_run
+
+    mock_settings.kuma_push_url = "http://uptime-kuma:3001/api/push/abc"
+    await _scheduled_run()
+
+    mock_pipeline.assert_called_once_with(mock_settings)
+    mock_push.assert_awaited_once()
+    url, status, msg, ping_ms = mock_push.await_args.args
+    assert (url, status, msg) == ("http://uptime-kuma:3001/api/push/abc", "up", "OK")
+    assert isinstance(ping_ms, int)
+
+
+@pytest.mark.asyncio
+@patch("server.kuma_push", new_callable=AsyncMock)
+@patch("server.run_pipeline", new_callable=AsyncMock, side_effect=RuntimeError("scrape failed"))
+@patch("server.settings")
+async def test_scheduled_run_pushes_down_on_failure(mock_settings, mock_pipeline, mock_push):
+    """A failed run reports status=down with the error, and the scheduler survives it."""
+    from server import _scheduled_run
+
+    mock_settings.kuma_push_url = "http://uptime-kuma:3001/api/push/abc"
+    await _scheduled_run()  # logs, does not raise
+
+    mock_push.assert_awaited_once_with("http://uptime-kuma:3001/api/push/abc", "down", "RuntimeError: scrape failed")

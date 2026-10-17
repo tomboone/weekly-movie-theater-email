@@ -12,6 +12,7 @@ def make_mock_settings() -> MagicMock:
     mock.schedule_cron = "0 10 * * 5"
     mock.schedule_timezone = "America/New_York"
     mock.movie_state_path = "/tmp/nonexistent.json"
+    mock.kuma_push_url = ""
     return mock
 
 

@@ -28,6 +28,7 @@ Runs as a Docker container with an internal scheduler (Friday 10 AM ET). Runs on
 | `EXCLUDE_PATTERNS` | Comma-separated title substrings to exclude (default: `Met Opera,NT Live,Bolshoi Ballet,Fathom,MARS:`) |
 | `TRIGGER_API_KEY` | Bearer token for the `/trigger` endpoint |
 | `SEND_EMPTY_EMAIL` | Send email even when no new movies (default: `false`) |
+| `KUMA_PUSH_URL` | Optional Uptime Kuma push monitor URL. After every run the app pushes `status=up` with the run time, or `status=down` with the error. Any query string on the URL is replaced. |
 
 ## Development
 
@@ -72,6 +73,8 @@ The container image is built and pushed to GHCR via GitHub Actions on push to `m
 2. Copy `.env` with production values
 3. `docker compose -f docker-compose.prod.yml up -d`
 4. Add a cron job to poll for updates: `*/5 * * * * /path/to/weekly-movie-theater-email/scripts/update.sh`
+
+The container also joins the external Docker network `kuma-push`, which the personal Uptime Kuma stack on the same host creates. Start that stack first, or `up` fails with `network kuma-push declared as external, but could not be found`. Set `KUMA_PUSH_URL=http://uptime-kuma:3001/api/push/<token>` in `.env` (a push monitor with an 8-day heartbeat interval covers the weekly run).
 
 The port is published on `127.0.0.1` only. To call `/trigger` from elsewhere, tunnel in: `ssh -L 8000:127.0.0.1:8000 kumadrome`.
 
