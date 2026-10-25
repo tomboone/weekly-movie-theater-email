@@ -41,3 +41,18 @@ def test_settings_exclude_patterns_parsed(monkeypatch):
 
     settings = Settings()  # type: ignore[reportCallIssue]
     assert settings.exclude_patterns == ["Fathom", "Special Event"]
+
+
+def test_settings_ignores_keys_for_other_services(monkeypatch, tmp_path):
+    # .env also feeds the Tailscale sidecar in docker-compose.prod.yml; its TS_* keys are not settings.
+    (tmp_path / ".env").write_text("TS_AUTHKEY=tskey-auth-x\nTS_EXTRA_ARGS=--advertise-tags=tag:app\n")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("REGAL_CINEMA_ID", "0985")
+    monkeypatch.setenv("TMDB_API_KEY", "k")
+
+    monkeypatch.setenv("ACS_CONNECTION_STRING", "endpoint=https://test.communication.azure.com/;accesskey=dGVzdA==")
+    monkeypatch.setenv("EMAIL_FROM", "f@x.com")
+    monkeypatch.setenv("EMAIL_TO", "t@x.com")
+
+    settings = Settings()  # type: ignore[reportCallIssue]
+    assert settings.regal_cinema_id == "0985"

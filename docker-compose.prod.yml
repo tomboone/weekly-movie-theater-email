@@ -4,7 +4,8 @@ services:
     restart: unless-stopped
     ports:
       # Loopback only. Docker-published ports bypass the host firewall (ufw), so "8000:8000" exposes
-      # the app, /trigger included, to the whole LAN. Reach it from the host or over an SSH tunnel.
+      # the app, /trigger included, to the whole LAN. `tailscale` below serves it on the personal
+      # tailnet; this port is for an SSH tunnel and checks on the host.
       - "127.0.0.1:8000:8000"
     env_file:
       - .env
@@ -18,8 +19,40 @@ services:
       # KUMA_PUSH_URL can be http://uptime-kuma:3001/api/push/<token> with nothing published on the host.
       - kuma-push
 
+  # The app's own Tailscale node on the personal tailnet, serving `app` over HTTPS at
+  # https://movie-email.tail1afe5a.ts.net (tailscale/serve.json). The node is tagged tag:app. Each app
+  # on kumadrome brings its own sidecar so that it gets its own MagicDNS name and HTTPS on 443.
+  tailscale:
+    image: tailscale/tailscale:stable
+    # Never the name of a service it proxies: Docker maps a container's own hostname to itself in
+    # /etc/hosts, so a proxy to that name would dial the sidecar (Navidrome's 502). The tailnet name
+    # is TS_HOSTNAME.
+    hostname: movie-email-tailscale
+    environment:
+      TS_HOSTNAME: movie-email
+      # One-time auth key from the personal tailnet. Needed only for the first start; blank it once the
+      # state volume holds the node key.
+      TS_AUTHKEY: ${TS_AUTHKEY:-}
+      # Log in only when the state holds no node key. The default re-runs the login on every start,
+      # which fails once a one-time key has been used.
+      TS_AUTH_ONCE: "true"
+      TS_EXTRA_ARGS: ${TS_EXTRA_ARGS:---advertise-tags=tag:app}
+      TS_STATE_DIR: /var/lib/tailscale
+      # Userspace networking: serve accepts the tailnet connections itself, so the sidecar needs no tun
+      # device and no NET_ADMIN.
+      TS_USERSPACE: "true"
+      TS_SERVE_CONFIG: /config/serve.json
+    volumes:
+      # The directory, not the file: containerboot watches it, so a git pull that replaces serve.json
+      # still reaches the sidecar.
+      - ./tailscale:/config:ro
+      # Node key and identity, so a recreated container rejoins as the same node.
+      - tailscale-state:/var/lib/tailscale
+    restart: unless-stopped
+
 volumes:
   app-data:
+  tailscale-state:
 
 networks:
   kuma-push:

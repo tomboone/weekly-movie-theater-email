@@ -33,7 +33,8 @@ class Settings(BaseSettings):
             return [p.strip() for p in v.split(",") if p.strip()]
         return v  # type: ignore[return-value]
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    # .env is shared with the prod Tailscale sidecar, whose TS_* keys are not settings.
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
     @classmethod
     def settings_customise_sources(
