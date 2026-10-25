@@ -69,7 +69,7 @@ server.py (FastAPI + APScheduler)
 
 ## Infrastructure
 
-- Runs on `kumadrome`, the home server (2011 Mac mini, Ubuntu), as a Docker container. It replaced the Raspberry Pi on 2026-10-17. Prod publishes `127.0.0.1:8000` only.
+- Runs on `kumadrome`, the home server (2011 Mac mini, Ubuntu), as a Docker container. It replaced the Raspberry Pi on 2026-10-17. Prod publishes `127.0.0.1:8000` only; a Tailscale sidecar (`tailscale` service, `tailscale/serve.json`) serves it on the personal tailnet at `https://movie-email.tail1afe5a.ts.net`.
 - GHCR for container images (multi-platform: amd64 + arm64)
 - GitHub Actions builds and pushes image on push to main or workflow_dispatch
 - CI workflow runs on PRs to main and updates/dependencies
