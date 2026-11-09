@@ -1,62 +1,49 @@
 version: 2
 updates:
-  - package-ecosystem: "uv"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "saturday"
-      time: "09:00"
-      timezone: "America/New_York"
+  - package-ecosystem: uv
+    directory: /
     target-branch: updates/dependencies
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "09:00"
+      timezone: America/New_York
     commit-message:
-      prefix: "deps"
-      include: "scope"
+      prefix: build
+      prefix-development: build
     groups:
-      python-prod:
-        applies-to: version-updates
-        dependency-type: "production"
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
-      python-dev:
-        applies-to: version-updates
-        dependency-type: "development"
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
+      minor-and-patch:
+        update-types: [minor, patch]
 
-  - package-ecosystem: "github-actions"
-    directory: "/.github/workflows"
-    schedule:
-      interval: "weekly"
-      day: "saturday"
-      time: "09:00"
-      timezone: "America/New_York"
+  - package-ecosystem: github-actions
+    directory: /
     target-branch: updates/dependencies
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "09:00"
+      timezone: America/New_York
     commit-message:
-      prefix: "deps"
-      include: "scope"
+      prefix: ci
+    # The shared workflows float on @v1; bumping them is the workflows repo's job.
+    ignore:
+      - dependency-name: neuroticsasquat-ch/workflows
     groups:
-      github-actions:
-        applies-to: version-updates
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
+      minor-and-patch:
+        update-types: [minor, patch]
 
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "saturday"
-      time: "09:00"
-      timezone: "America/New_York"
+  # Beyond the standard set: the Playwright base image's tag tracks the pinned playwright package, so
+  # it has to move with it.
+  - package-ecosystem: docker
+    directory: /
     target-branch: updates/dependencies
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "09:00"
+      timezone: America/New_York
     commit-message:
-      prefix: "deps"
-      include: "scope"
+      prefix: build
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
