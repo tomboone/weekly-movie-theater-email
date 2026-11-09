@@ -65,7 +65,13 @@ Requires the dev container to be running (`task up`).
 
 ## Deployment
 
-The container image is built and pushed to GHCR via GitHub Actions on push to `main` or via `workflow_dispatch`. The image supports both amd64 and arm64.
+CI (`.github/workflows/ci.yml`) calls the shared workflows in `neuroticsasquat-ch/workflows@v1`. On every PR it runs ruff, pyright and the unit tests on the runner, builds the image for amd64, checks that it doesn't run as root, and runs `.github/ci/smoke.sh`. On push to `main`, once the `ci` check passes, `publish` pushes the image to GHCR as `latest` and `sha-<7>`, for amd64 and arm64.
+
+The image runs as `pwuser` (uid 1001), not root. The `app-data` volume on kumadrome was created while the image ran as root, so its files are root's and the app can't save state until they are handed over, once:
+
+```
+docker compose -f docker-compose.prod.yml exec -u root app chown -R pwuser:pwuser /app/data
+```
 
 ### Production setup (kumadrome)
 
@@ -78,7 +84,7 @@ The container also joins the external Docker network `kuma-push`, which the pers
 
 The port is published on `127.0.0.1` only, never the LAN. From a personal-tailnet device, use the Tailscale sidecar (below). From a device off the tailnet, tunnel in: `ssh -L 8000:127.0.0.1:8000 kumadrome`.
 
-Dependabot PRs target `updates/dependencies` for batched merging.
+Dependabot PRs target `updates/dependencies`. `.github/workflows/dependencies.yml` merges each green one into that branch, keeps it in sync with `main`, and promotes it to `main` on Saturdays when CI is green and no major bump is in the batch.
 
 ### Tailnet access (Tailscale sidecar)
 

@@ -63,7 +63,7 @@ tasks:
         && ruff format --check .
         && pyright
         && yamllint -d relaxed .github/ docker-compose.yml Taskfile.yml
-        && pytest tests/unit/ -v"
+        && pytest -v"
 
   lint:
     desc: Run ruff check
@@ -98,7 +98,7 @@ tasks:
   test:
     desc: Run unit tests
     cmds:
-      - docker compose exec -T app pytest tests/unit/ -v
+      - docker compose exec -T app pytest -v
 
   test:integration:
     desc: Run integration tests (requires network + Playwright)

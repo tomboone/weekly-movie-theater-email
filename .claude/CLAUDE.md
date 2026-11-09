@@ -71,9 +71,10 @@ server.py (FastAPI + APScheduler)
 
 - Runs on `kumadrome`, the home server (2011 Mac mini, Ubuntu), as a Docker container. It replaced the Raspberry Pi on 2026-10-17. Prod publishes `127.0.0.1:8000` only; a Tailscale sidecar (`tailscale` service, `tailscale/serve.json`) serves it on the personal tailnet at `https://movie-email.tail1afe5a.ts.net`.
 - GHCR for container images (multi-platform: amd64 + arm64)
-- GitHub Actions builds and pushes image on push to main or workflow_dispatch
-- CI workflow runs on PRs to main and updates/dependencies
-- Dependabot for dependency updates (PRs target updates/dependencies branch)
+- CI (`ci.yml`) calls the shared `neuroticsasquat-ch/workflows@v1`: ruff, pyright and unit tests on the runner (not in the container), plus an image check (non-root, `.github/ci/smoke.sh`) on every PR; `publish` pushes the image only on `main`, after `ci` passes
+- The image runs as `pwuser` (uid 1001), not root
+- Dependabot PRs target `updates/dependencies`; `dependencies.yml` auto-merges them there and promotes the branch to `main` (shared `dependency-branch.yml`)
+- `uv.lock` is the source of the image's runtime dependencies and of CI's
 - The host polls for new images via a `scripts/update.sh` cron job (every 5 min)
 - Optional `KUMA_PUSH_URL`: after every run `monitor.kuma_push` reports up/down to the personal Uptime Kuma, over the external `kuma-push` Docker network
 - `docker-compose.prod.yml` for production, `docker-compose.yml` for local dev

@@ -25,6 +25,10 @@ dev = [
     "yamllint>=1.38.0",
 ]
 
+# An app, not a package: uv installs its dependencies only.
+[tool.uv]
+package = false
+
 [tool.ruff]
 target-version = "py312"
 line-length = 120
@@ -35,8 +39,9 @@ select = ["E", "F", "I", "W", "UP", "B", "SIM"]
 [tool.pyright]
 pythonVersion = "3.12"
 typeCheckingMode = "basic"
-venvPath = "."
-venv = "."
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+# The default run (CI, `task test`) is the unit tests. The integration tests need network and Playwright
+# browsers; `task test:integration` names their path, which overrides this.
+testpaths = ["tests/unit"]

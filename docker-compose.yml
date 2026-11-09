@@ -1,6 +1,9 @@
 services:
   app:
     build: .
+    # The image runs as pwuser; the dev container installs the dev group into the system Python at
+    # start, which needs root.
+    user: root
     env_file:
       - path: .env
         required: false

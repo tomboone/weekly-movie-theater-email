@@ -1,28 +1,45 @@
-name: CI
+name: ci
 
 on:
   pull_request:
-    branches: [main, updates/dependencies]
+  push:
+    branches: [main]
 
-env:
-  COMPOSE_FILE: docker-compose.yml:docker-compose.ci.yml
+# A newer push to a PR cancels its older run; runs on main are never cancelled.
+concurrency:
+  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
 
 jobs:
-  check:
-    name: Lint, Type Check, and Test
+  # uv sync, ruff check, ruff format --check, pyright, pytest. Scope and options live in pyproject.toml.
+  python:
+    uses: neuroticsasquat-ch/workflows/.github/workflows/python.yml@v1
+
+  # Builds the image (linux/amd64) without pushing, checks it doesn't run as root, runs
+  # .github/ci/smoke.sh. The arm64 half is built by publish, under QEMU.
+  image:
+    uses: neuroticsasquat-ch/workflows/.github/workflows/image-check.yml@v1
+
+  ci: # the one required check; the name is the contract
+    if: always()
+    needs: [python, image] # every other job, extras included
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
+      - uses: neuroticsasquat-ch/workflows/actions/gate@v1
+        with:
+          needs: ${{ toJSON(needs) }}
 
-      - name: Build
-        run: docker compose build
-
-      - name: Run checks
-        run: >-
-          docker compose run --rm --no-deps app sh -c
-          "uv pip install --system --quiet --group dev
-          && ruff check .
-          && ruff format --check .
-          && pyright
-          && pytest tests/unit/ -v"
+  # main → latest and sha-<7>, only after ci passed on that commit. The host's scripts/update.sh cron
+  # pulls latest.
+  publish:
+    if: ${{ !cancelled() && github.event_name == 'push' && needs.ci.result == 'success' }}
+    needs: ci
+    concurrency: { group: "publish-${{ github.ref }}", cancel-in-progress: false }
+    permissions: { contents: read, packages: write }
+    uses: neuroticsasquat-ch/workflows/.github/workflows/image-publish.yml@v1
+    with:
+      image: ghcr.io/tomboone/weekly-movie-theater-email
+      platforms: linux/amd64,linux/arm64
