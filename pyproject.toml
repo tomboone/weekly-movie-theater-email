@@ -6,11 +6,11 @@ dependencies = [
     "playwright==1.65.2",
     "playwright-stealth>=2.0.3,<3",
     "httpx>=0.28.1,<1",
-    "fastapi>=0.164.0,<1",
+    "fastapi>=0.165.0,<1",
     "uvicorn>=0.54.0,<1",
     "apscheduler>=3.11.3,<4",
     "azure-communication-email>=1.1.0,<2",
-    "pydantic>=2.14.2,<3",
+    "pydantic>=2.14.4,<3",
     "pydantic-settings>=2.16.3,<3",
 ]
 
@@ -21,7 +21,7 @@ dev = [
     "respx>=0.23.1,<1",
     "pyright>=1.1.414",
     "pytest-cov>=7.1.0",
-    "ruff>=0.17.5",
+    "ruff>=0.17.6",
     "yamllint>=1.38.0",
 ]
 
